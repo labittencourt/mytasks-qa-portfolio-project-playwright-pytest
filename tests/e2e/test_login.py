@@ -63,6 +63,7 @@ class TestLoginForm:
 
         expect(login.error_message).to_have_text("Invalid username or password")
 
+    @pytest.mark.smoke
     def test_successful_login_redirects_to_home_and_shows_user_email(self, page, base_url, registered_user):
         login = LoginPage(page)
         login.login(registered_user["email"], registered_user["password"])

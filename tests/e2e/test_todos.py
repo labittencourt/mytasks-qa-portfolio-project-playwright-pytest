@@ -29,6 +29,8 @@ def test_new_user_sees_empty_state(todos):
     expect(todos.counter).to_have_text("0 task(s) — 0 pending, 0 completed")
 
 
+@pytest.mark.smoke
+@pytest.mark.wip
 def test_create_todo_adds_item_and_updates_counter(todos):
     todos.add_todo("Write automated tests")
 
@@ -43,6 +45,7 @@ def test_create_todo_with_empty_title_shows_error_and_does_not_add_item(todos):
     expect(todos.list).to_contain_text("No tasks found.")
 
 
+@pytest.mark.smoke
 def test_toggle_todo_marks_as_completed_and_updates_counter(todos):
     todos.add_todo("Review PR")
 
@@ -53,6 +56,7 @@ def test_toggle_todo_marks_as_completed_and_updates_counter(todos):
     expect(todos.counter).to_have_text("1 task(s) — 0 pending, 1 completed")
 
 
+@pytest.mark.smoke
 def test_edit_todo_updates_title(todos):
     todos.add_todo("Original title")
 
@@ -82,6 +86,7 @@ def test_cancel_edit_keeps_original_title(todos):
     expect(todos.list).not_to_contain_text("Title that should not be saved")
 
 
+@pytest.mark.smoke
 def test_delete_todo_removes_item(todos):
     todos.add_todo("Temporary task")
 

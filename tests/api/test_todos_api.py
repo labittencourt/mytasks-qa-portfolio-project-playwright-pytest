@@ -26,6 +26,7 @@ class TestAuthorization:
 
 
 class TestCrud:
+    @pytest.mark.smoke
     def test_create_list_update_and_delete_todo(self, api_client, registered_user):
         token = registered_user["token"]
 

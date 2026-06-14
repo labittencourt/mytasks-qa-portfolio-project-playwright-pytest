@@ -62,6 +62,7 @@ class TestRegisterForm:
 
         expect(register.confirm_password_error).to_have_text("Passwords do not match.")
 
+    @pytest.mark.smoke
     def test_successful_registration_redirects_to_login_with_success_message(self, page, base_url, new_user):
         register = RegisterPage(page)
         register.register(new_user["email"], new_user["password"])

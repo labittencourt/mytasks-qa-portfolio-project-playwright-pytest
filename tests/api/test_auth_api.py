@@ -15,6 +15,7 @@ pytestmark = pytest.mark.api
 
 
 class TestRegister:
+    @pytest.mark.smoke
     def test_register_with_valid_email_and_password_returns_token(self, api_client, new_user):
         res = api_client.register(new_user["email"], new_user["password"])
 
@@ -84,6 +85,7 @@ class TestRegister:
 
 
 class TestLogin:
+    @pytest.mark.smoke
     def test_login_with_valid_credentials_returns_token(self, api_client, registered_user):
         res = api_client.login(registered_user["email"], registered_user["password"])
 
@@ -127,6 +129,8 @@ class TestLogin:
         assert res.json()["error"] == "Email and password are required"
 
 
+@pytest.mark.smoke
+@pytest.mark.wip
 def test_health_check_returns_ok(api_client):
     res = api_client.health()
 

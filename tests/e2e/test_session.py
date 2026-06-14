@@ -13,6 +13,7 @@ from pages.todos_page import TodosPage
 pytestmark = pytest.mark.e2e
 
 
+@pytest.mark.smoke
 def test_logout_clears_session_and_redirects_to_login(authenticated_page, base_url):
     todos = TodosPage(authenticated_page)
 

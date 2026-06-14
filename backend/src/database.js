@@ -4,6 +4,12 @@ const path = require("path");
 const dbPath = path.join(__dirname, "..", "data", "todos.db");
 const db = new Database(dbPath);
 
+// WAL allows concurrent reads while a write is in progress, and the busy
+// timeout makes concurrent writers wait instead of failing immediately
+// with SQLITE_BUSY (important when tests run in parallel).
+db.pragma("journal_mode = WAL");
+db.pragma("busy_timeout = 5000");
+
 // Create tables if they don't exist
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
