@@ -133,6 +133,10 @@ Registered in `pytest.ini`:
   cases are deliberately left out of `smoke` — they're covered by the
   full suite (`pytest`).
 
+  `smoke` is also what runs in CI on every push to `main` (see
+  [CI/CD](../README.md#cicd) in the root README), so it's deliberately
+  kept fast and stable — avoid adding flaky or slow scenarios to it.
+
 - **`wip`** — work in progress, see below.
 
 ### `wip`: working on a single test

@@ -1,0 +1,136 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Test suite to run"
+        type: choice
+        default: all
+        options:
+          - all
+          - api
+          - e2e
+          - smoke
+  schedule:
+    # Full regression suite every day at 06:00 UTC
+    - cron: "0 6 * * *"
+    # API suite — Tue/Thu at 12:00 BRT (15:00 UTC)
+    - cron: "0 15 * * 2,4"
+    # E2E suite — Wed/Fri at 12:00 BRT (15:00 UTC)
+    - cron: "0 15 * * 3,5"
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start backend and frontend
+        run: docker compose up --build -d backend frontend
+
+      - name: Wait for backend health check
+        run: |
+          for i in $(seq 1 30); do
+            status=$(docker inspect -f '{{.State.Health.Status}}' qa-backend)
+            if [ "$status" = "healthy" ]; then
+              echo "Backend is healthy"
+              exit 0
+            fi
+            echo "Waiting for backend (status: $status)..."
+            sleep 2
+          done
+          echo "Backend did not become healthy in time" >&2
+          docker compose logs backend
+          exit 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: tests/requirements.txt
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Select test suite
+        id: select
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.suite }}" != "all" ]; then
+            marker="-m ${{ inputs.suite }}"
+            label="manual: ${{ inputs.suite }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            marker="-m smoke"
+            label="push: smoke"
+          elif [ "${{ github.event_name }}" = "schedule" ]; then
+            case "${{ github.event.schedule }}" in
+              "0 15 * * 2,4")
+                marker="-m api"
+                label="scheduled: api (Tue/Thu 12:00 BRT)"
+                ;;
+              "0 15 * * 3,5")
+                marker="-m e2e"
+                label="scheduled: e2e (Wed/Fri 12:00 BRT)"
+                ;;
+              *)
+                marker=""
+                label="scheduled: full regression"
+                ;;
+            esac
+          else
+            marker=""
+            label="manual: all"
+          fi
+          echo "marker=$marker" >> "$GITHUB_OUTPUT"
+          echo "label=$label" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests (${{ steps.select.outputs.label }})
+        working-directory: tests
+        env:
+          BASE_URL: http://localhost
+          API_URL: http://localhost:3001
+        run: >
+          pytest ${{ steps.select.outputs.marker }}
+          --html=playwright-report/index.html --self-contained-html
+          --junitxml=junit.xml
+
+      - name: Publish test results summary
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Pytest results (${{ steps.select.outputs.label }})
+          path: tests/junit.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+          retention-days: 14
+
+      - name: Upload JUnit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-report
+          path: tests/junit.xml
+          retention-days: 14
+
+      - name: Show service logs on failure
+        if: failure()
+        run: docker compose logs
