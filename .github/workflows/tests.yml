@@ -27,7 +27,8 @@ permissions:
   checks: write
 
 jobs:
-  test:
+  build:
+    name: Build images
     # Pinned to 22.04 (jammy) to match playwright==1.44.0's OS dependency
     # list (the package names `playwright install --with-deps` expects
     # changed on 24.04) and the jammy-based image used by the `tests`
@@ -38,8 +39,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build backend and frontend images
+        run: docker compose build backend frontend
+
+      - name: Save images
+        run: docker save $(docker compose config --images) -o app-images.tar
+
+      - name: Upload images artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images
+          path: app-images.tar
+          retention-days: 1
+
+  test:
+    name: Run tests
+    needs: build
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download images artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-images
+
+      - name: Load images
+        run: docker load -i app-images.tar
+
       - name: Start backend and frontend
-        run: docker compose up --build -d backend frontend
+        run: docker compose up -d backend frontend
 
       - name: Wait for backend health check
         run: |
