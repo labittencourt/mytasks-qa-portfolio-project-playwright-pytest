@@ -28,7 +28,11 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned to 22.04 (jammy) to match playwright==1.44.0's OS dependency
+    # list (the package names `playwright install --with-deps` expects
+    # changed on 24.04) and the jammy-based image used by the `tests`
+    # service in docker-compose.yml.
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
