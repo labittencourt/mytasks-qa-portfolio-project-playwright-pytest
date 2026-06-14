@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# SQLite database (generated at runtime)
+backend/data/
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# E2E test artifacts
+tests/test-results/
+tests/playwright-report/
+tests/junit.xml
+
+# Python
+tests/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

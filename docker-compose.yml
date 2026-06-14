@@ -1,0 +1,52 @@
+services:
+
+  # ── Backend ──────────────────────────────────────────────
+  backend:
+    build: ./backend
+    container_name: qa-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-me}
+    volumes:
+      - sqlite-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Frontend ─────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: qa-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ── Automated tests (API + E2E) ───────────────────────
+  tests:
+    image: mcr.microsoft.com/playwright/python:v1.44.0-jammy
+    container_name: qa-tests
+    working_dir: /tests
+    environment:
+      - BASE_URL=http://frontend
+      - API_URL=http://backend:3001
+    volumes:
+      - ./tests:/tests
+    depends_on:
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_healthy
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             playwright install chromium &&
+             pytest --html=playwright-report/index.html --self-contained-html --junitxml=junit.xml"
+    profiles:
+      - test
+
+volumes:
+  sqlite-data:

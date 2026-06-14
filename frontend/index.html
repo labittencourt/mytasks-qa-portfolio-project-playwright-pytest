@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Portfolio — Todo List</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <div>
+          <h1>📝 My Tasks</h1>
+          <p class="subtitle">QA Portfolio Project</p>
+        </div>
+        <div class="user-info">
+          <span id="user-label" data-testid="user-label"></span>
+          <button id="logout-btn" class="secondary" data-testid="logout-btn">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Creation form -->
+    <div class="form-card">
+      <input
+        type="text"
+        id="todo-input"
+        placeholder="Enter a new task..."
+        maxlength="100"
+        data-testid="todo-input"
+      />
+      <button id="add-btn" data-testid="add-btn">Add</button>
+    </div>
+
+    <!-- Error message -->
+    <p id="error-msg" class="error-msg" data-testid="error-msg"></p>
+
+    <!-- Filters -->
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all" data-testid="filter-all">All</button>
+      <button class="filter-btn" data-filter="active" data-testid="filter-active">Pending</button>
+      <button class="filter-btn" data-filter="completed" data-testid="filter-completed">Completed</button>
+    </div>
+
+    <!-- Counter -->
+    <p id="counter" class="counter" data-testid="counter"></p>
+
+    <!-- Task list -->
+    <ul id="todo-list" data-testid="todo-list"></ul>
+
+    <!-- Edit modal -->
+    <div id="edit-modal" class="modal hidden" data-testid="edit-modal">
+      <div class="modal-content">
+        <h2>Edit Task</h2>
+        <input type="text" id="edit-input" data-testid="edit-input" maxlength="100" />
+        <div class="modal-actions">
+          <button id="save-edit-btn" data-testid="save-edit-btn">Save</button>
+          <button id="cancel-edit-btn" data-testid="cancel-edit-btn" class="secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="modal-overlay" class="modal-overlay hidden"></div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
