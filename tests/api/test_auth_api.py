@@ -11,6 +11,8 @@ The scenarios combine:
 
 import pytest
 
+from conftest import DEFAULT_PASSWORD, VALID_EMAIL
+
 pytestmark = pytest.mark.api
 
 
@@ -42,7 +44,7 @@ class TestRegister:
         ids=["no_at_sign", "no_domain", "no_user", "with_space", "empty"],
     )
     def test_register_with_invalid_email_format_is_rejected(self, api_client, email):
-        res = api_client.register(email, "Password123")
+        res = api_client.register(email, DEFAULT_PASSWORD)
 
         assert res.status_code == 400
 
@@ -71,8 +73,8 @@ class TestRegister:
     @pytest.mark.parametrize(
         "payload",
         [
-            {"password": "Password123"},
-            {"username": "user@test.com"},
+            {"password": DEFAULT_PASSWORD},
+            {"username": VALID_EMAIL},
             {},
         ],
         ids=["missing_username", "missing_password", "empty_payload"],
@@ -108,7 +110,7 @@ class TestLogin:
         assert res_unknown.json()["error"] == "Invalid username or password"
 
     def test_login_with_invalid_email_format_returns_bad_request(self, api_client):
-        res = api_client.login("not-an-email", "Password123")
+        res = api_client.login("not-an-email", DEFAULT_PASSWORD)
 
         assert res.status_code == 400
         assert res.json()["error"] == "Please enter a valid email"
@@ -116,8 +118,8 @@ class TestLogin:
     @pytest.mark.parametrize(
         "payload",
         [
-            {"password": "Password123"},
-            {"username": "user@test.com"},
+            {"password": DEFAULT_PASSWORD},
+            {"username": VALID_EMAIL},
             {},
         ],
         ids=["missing_username", "missing_password", "empty_payload"],

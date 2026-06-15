@@ -10,6 +10,7 @@ Heuristics applied (Bolton/Bach):
 import pytest
 from playwright.sync_api import expect
 
+from conftest import DEFAULT_PASSWORD, VALID_EMAIL
 from pages.register_page import RegisterPage
 
 pytestmark = pytest.mark.e2e
@@ -22,20 +23,20 @@ class TestRegisterForm:
 
         expect(register.submit_btn).to_be_disabled()
 
-        register.email_input.fill("user@test.com")
-        register.password_input.fill("Password123")
+        register.email_input.fill(VALID_EMAIL)
+        register.password_input.fill(DEFAULT_PASSWORD)
         register.confirm_password_input.fill("Password999")
         expect(register.submit_btn).to_be_disabled()
 
-        register.confirm_password_input.fill("Password123")
+        register.confirm_password_input.fill(DEFAULT_PASSWORD)
         expect(register.submit_btn).to_be_enabled()
 
     def test_invalid_email_format_shows_field_error(self, page):
         register = RegisterPage(page)
         register.goto()
         register.email_input.fill("invalid-user")
-        register.password_input.fill("Password123")
-        register.confirm_password_input.fill("Password123")
+        register.password_input.fill(DEFAULT_PASSWORD)
+        register.confirm_password_input.fill(DEFAULT_PASSWORD)
         register.confirm_password_input.press("Enter")
 
         expect(register.email_error).to_have_text("Please enter a valid email.")
@@ -43,7 +44,7 @@ class TestRegisterForm:
     def test_invalid_password_format_shows_field_error(self, page):
         register = RegisterPage(page)
         register.goto()
-        register.email_input.fill("user@test.com")
+        register.email_input.fill(VALID_EMAIL)
         register.password_input.fill("nonumbers")
         register.confirm_password_input.fill("nonumbers")
         register.confirm_password_input.press("Enter")
@@ -55,8 +56,8 @@ class TestRegisterForm:
     def test_password_mismatch_shows_field_error(self, page):
         register = RegisterPage(page)
         register.goto()
-        register.email_input.fill("user@test.com")
-        register.password_input.fill("Password123")
+        register.email_input.fill(VALID_EMAIL)
+        register.password_input.fill(DEFAULT_PASSWORD)
         register.confirm_password_input.fill("Password999")
         register.confirm_password_input.press("Enter")
 
@@ -91,8 +92,8 @@ class TestRegisterForm:
     def test_password_visibility_toggle_for_both_fields(self, page):
         register = RegisterPage(page)
         register.goto()
-        register.password_input.fill("Password123")
-        register.confirm_password_input.fill("Password123")
+        register.password_input.fill(DEFAULT_PASSWORD)
+        register.confirm_password_input.fill(DEFAULT_PASSWORD)
 
         expect(register.password_input).to_have_attribute("type", "password")
         expect(register.confirm_password_input).to_have_attribute("type", "password")

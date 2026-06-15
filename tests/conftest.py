@@ -6,6 +6,7 @@ import pytest
 from utils.api_client import ApiClient
 
 DEFAULT_PASSWORD = "Password123"
+VALID_EMAIL = "user@test.com"
 
 
 @pytest.fixture(scope="session")

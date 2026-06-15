@@ -12,6 +12,7 @@ Heuristics applied (Bolton/Bach):
 import pytest
 from playwright.sync_api import expect
 
+from conftest import DEFAULT_PASSWORD, VALID_EMAIL
 from pages.login_page import LoginPage
 
 pytestmark = pytest.mark.e2e
@@ -33,15 +34,15 @@ class TestLoginForm:
         login.fill_credentials("invalid-user", "123")
         expect(login.submit_btn).to_be_disabled()
 
-        login.email_input.fill("user@test.com")
-        login.password_input.fill("Password123")
+        login.email_input.fill(VALID_EMAIL)
+        login.password_input.fill(DEFAULT_PASSWORD)
         expect(login.submit_btn).to_be_enabled()
 
     def test_invalid_email_format_shows_field_error(self, page):
         login = LoginPage(page)
         login.goto()
         login.email_input.fill("invalid-user")
-        login.password_input.fill("Password123")
+        login.password_input.fill(DEFAULT_PASSWORD)
         login.password_input.press("Enter")
 
         expect(login.email_error).to_have_text("Please enter a valid email.")
@@ -49,7 +50,7 @@ class TestLoginForm:
     def test_invalid_password_format_shows_field_error(self, page):
         login = LoginPage(page)
         login.goto()
-        login.email_input.fill("user@test.com")
+        login.email_input.fill(VALID_EMAIL)
         login.password_input.fill("nonumbers")
         login.password_input.press("Enter")
 
@@ -74,7 +75,7 @@ class TestLoginForm:
     def test_password_visibility_toggle(self, page):
         login = LoginPage(page)
         login.goto()
-        login.password_input.fill("Password123")
+        login.password_input.fill(DEFAULT_PASSWORD)
 
         expect(login.password_input).to_have_attribute("type", "password")
 
